@@ -76,7 +76,7 @@
         border-top: solid 2px aquamarine;
     }
 </style>
-<div id="term-help" class="alert alert-info" style="display: none; position: fixed; width: 50vw; left: 25vw; top: 10vh; max-height: 80vh; overflow-y: scroll;">
+<div id="term-help" class="alert alert-info" style="display: none; position: fixed; width: 70vw; left: 15vw; top: 10vh; max-height: 80vh; overflow-y: scroll;">
     <b>lessjs 是什么？</b><br>
     <p>
     1. lessjs 是仿 linux 下 <code>less</code> 命令的基本操作方法（但是快捷键略有不同），直接在网页上对长文本进行浏览和筛选的工具。<br>
@@ -95,10 +95,10 @@
         <tr><td><kbd>/</kbd> 进入搜索模式</td><td><kbd>:</kbd> 进入命令模式</td></tr>
         <tr><td><kbd>Esc</kbd> 退出搜索/命令模式</td></tr>
     </table>
-    <b>命令列表</b>
+    <b>命令列表</b>&nbsp;&nbsp;(<code>{var}</code>代表变量, <code>[opt]</code>代表可选部分)
     <table class="kbd-table">
         <tr><td><code>:wrap</code> 折行显示</td><td><code>:nowrap</code> 不折行显示</td></tr>
-        <tr><td><code>:{n}</code> 跳转到第 {n} 行</td><td><code>:nohl</code> 取消高亮显示</td></tr>
+        <tr><td><code>:{n}[%]</code> 跳转到第目标行</td><td><code>:nohl</code> 取消高亮显示</td></tr>
         <tr><td><code>:show status</code> 显示状态栏</td><td><code>:hide status</code> 隐藏状态栏</td></tr>
     </table>
     <br>

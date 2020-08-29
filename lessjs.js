@@ -236,9 +236,10 @@ Term.prototype.sendCommand = function (cmd) {
         return this.noHighlight();
     }
 
-    if (cmd.substr(0, 1) == ':') {
-        if (cmd.substr(1).match(/^\d+$/)) {
-            return this.setLine(parseInt(cmd.substr(1)) - 1);
-        }
+    if (cmd.match(/^:\d+$/)) {
+        return this.setLine(parseInt(cmd.substr(1)) - 1);
+    } else if (cmd.match(/^:\d+%$/)) {
+        let percent = parseInt(cmd.match(/^:(\d+)%$/)[1]);
+        this.setLine(percent / 100 * this.fullLines.length);
     }
 }
