@@ -143,15 +143,14 @@ Term.prototype.next = function (line) {
     this.setLine(this.curLine + line);
 }
 
-Term.prototype.nextMatch = function (diff) {
+Term.prototype.nextMatch = function (diff, offset) {
     if (!this.highlightReg) return;
-    if (!diff) {
-        diff = 1;
-    }
+    if (!diff) diff = 1;
+    if (undefined == offset) offset = diff;
 
     this.show();    // update highlight style display first
-    let cur = this.curLine + diff;
-    while (cur < this.fullLines.length) {
+    let cur = this.curLine + offset;
+    while (cur < this.fullLines.length && cur >= 0) {
         if (this.fullLines[cur].match(this.highlightReg)) {
             this.setLine(cur);
             return;
@@ -253,7 +252,7 @@ Term.prototype.setHighlight = function (regText) {
     }
     this.debugLog("setHighlight: ", regText, "g" + flag);
     this.highlightReg = new RegExp("(" + regText + ")", "g" + flag);
-    this.nextMatch();
+    this.nextMatch(1, 0);
 }
 
 Term.prototype.noHighlight = function () {
