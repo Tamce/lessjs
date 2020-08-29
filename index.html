@@ -28,7 +28,7 @@
 </div>
 <div id="content">加载中...请等待...</div>
 <div id="footer" class="term-only">
-    <span style="color:aquamarine;">command&gt; </span>
+    <span id="cmd-hint" style="color:aquamarine;">command&gt; </span>
     <span id="command"></span>
 </div>
 <style>
@@ -68,9 +68,8 @@
         width: 100vw !important;
         padding: 10px 12px;
     }
-    .term .error {
-        color: #f33;
-    }
+    .term .fg1 { color: #f33; }
+    .term .bg4 { background-color :yellow; }
     #footer.focus {
         display: block;
         border-top: solid 2px aquamarine;
@@ -86,17 +85,14 @@ window.term = new Term({
     fulltext: "",
     linesPerScreen: $("#content").height() / 15,
     funShowHtml: function (text) {
-        $("#content").text(text);
-        text = $("#content").html();
-        text = text.replace(/\033\[31;49;1m/g, '<span class="error">');
-        text = text.replace(/\033\[39;49;0m/g, "</span>");
         $("#content").html(text);
     }
 });
-function startInputCommand(prefix) {
+function startInputCommand(prefix, hint) {
     window.commandMode = true;
     window.command = prefix;
     $("#footer").addClass("focus");
+    $("#cmd-hint").text(hint + "> ");
     $("#command").text(window.command);
 }
 function exitCommandMode() {
@@ -150,14 +146,14 @@ $("body").keydown(function (e) {
         case 'j': term.nextLine(); break;
         case 'd': term.nextPage(0.5); break;
         case 'u': term.prevPage(0.5); break;
-        case ':': startInputCommand(":"); break;
-        case '/': startInputCommand("/"); break;
+        case ':': startInputCommand(":", "command"); break;
+        case '/': startInputCommand("/", "search"); break;
     }
 });
 $(document).ready(function(){
     $.ajax({
         type: 'GET',
-        url: "/largetext.txt",
+        url: "/large.log",
         error: function (data) {
             console.error("fetch data error");
         },
