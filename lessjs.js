@@ -180,6 +180,7 @@ Term.prototype.text = function (update) {
 }
 
 Term.prototype.parseColor = function (text) {
+    // FIXME: 目前代码 9 只是当作默认来处理（使用9族class），并没有实现类似的 pop 的逻辑
     text = "<span>" + text + "</span>";
     let match = null;
     let curfg = 9;
@@ -195,7 +196,7 @@ Term.prototype.parseColor = function (text) {
                 // foreground
                 curfg = ctrl - 30;
             } else if (ctrl >= 40 && ctrl <= 49) {
-                // backgoround
+                // background
                 curbg = ctrl - 40;
             } else if (ctrl < 10) {
                 // formatter
@@ -225,7 +226,7 @@ Term.prototype.show = function () {
         text = text.replace(/\n/g, "<br>");
         // Highlights
         if (this.highlightReg) {
-            text = text.replace(this.highlightReg, '\033\[44m$1\033\[49m');
+            text = text.replace(this.highlightReg, '\033\[43m$1\033\[49m');
         }
 
         // Parse color control characters

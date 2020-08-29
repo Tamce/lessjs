@@ -68,13 +68,39 @@
         width: 100vw !important;
         padding: 10px 12px;
     }
-    .term .fg1 { color: #f33; }
-    .term .bg4 { background-color :yellow; }
-    .term .fmt1 { font-weight: 800; }
     #footer.focus {
         display: block;
         border-top: solid 2px aquamarine;
     }
+
+    /** term ansi color (fg{n}, bg{n}, fmt{n}) **/
+    /* 0-7: black red green yellow blue magenta cyan white */
+    /* Ayu color theme: https://github.com/mbadolato/iTerm2-Color-Schemes/blob/master/alacritty/ayu.yml */
+    .term .fg0 { color: #323232; }
+    .term .fg1 { color: #ff6565; }
+    .term .fg2 { color: #eafe84; }
+    .term .fg3 { color: #fff779; }
+    .term .fg4 { color: #68d5ff; }
+    .term .fg5 { color: #ffa3aa; }
+    .term .fg6 { color: #c7fffd; }
+    .term .fg7 { color: #ffffff; }
+    .term .fg9 { color: #ffffff; } /* default */
+
+    .term .bg1 { background-color: #ff6565; }
+    .term .bg0 { background-color: #323232; }
+    .term .bg2 { background-color: #eafe84; }
+    .term .bg3 { background-color: #fff779; }
+    .term .bg4 { background-color: #68d5ff; }
+    .term .bg5 { background-color: #ffa3aa; }
+    .term .bg6 { background-color: #c7fffd; }
+    .term .bg7 { background-color: #ffffff; }
+    .term .bg9 { background-color: #323232; } /* default */
+
+    .term .fmt1 { font-weight: 800; }
+    .term .fmt4 { text-decoration: underline; }
+
+    .term .bg3.fg9 { color: #323232; } /* 避免黄色太亮看不到字 */
+    .term .bg3.fg0 { color: #323232; }
 </style>
 <div id="term-help" class="alert alert-info" style="display: none; position: fixed; width: 70vw; left: 15vw; top: 10vh; max-height: 80vh; overflow-y: scroll;">
     <b>lessjs 是什么？</b><br>
