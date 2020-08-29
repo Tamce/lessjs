@@ -12,18 +12,21 @@
 <div id="term-help" class="alert alert-info" style="display: none; position: fixed; width: 50vw; left: 25vw; top: 20vh;">
     <b>lessjs 是什么？</b><br>
     <p>
-    1. lessjs 是仿 linux 下 <code>less</code> 命令的基本操作方法，直接在网页上对长文本进行浏览和筛选的工具。<br>
+    1. lessjs 是仿 linux 下 <code>less</code> 命令的基本操作方法（但是快捷键略有不同），直接在网页上对长文本进行浏览和筛选的工具。<br>
     2. 基本保持和 <code>less</code> 一致的快捷键以降低使用学习成本，并且提供颜色字符高亮显示功能(目前支持不全)。<br>
     <br>
-    <b>快捷键说明</b><br>
-    <p>
-        <kbd>?</kbd> / <kbd>h</kbd> 显示此帮助信息<br>
-        <kbd>Esc</kbd> 关闭此提示<br>
-        <kbd>u</kbd> 向上滚动半屏<br>
-        <kbd>d</kbd> 向下滚动半屏<br>
-        <kbd>k</kbd> 向上滚动一行<br>
-        <kbd>j</kbd> 向下滚动一行<br>
-    </p>
+    <b>快捷键说明</b>
+    <style>
+        #kbd-table td { padding: 0 12px; }
+    </style>
+    <table id="kbd-table">
+        <tr><td><kbd>?</kbd> 显示此帮助信息<br></td><td><kbd>Esc</kbd> 关闭此提示</td></tr>
+        <tr><td><kbd>u</kbd> 向上滚动半屏</td><td><kbd>d</kbd> 向下滚动半屏</td></tr>
+        <tr><td><kbd>k</kbd> 向上滚动一行</td><td><kbd>j</kbd> 向下滚动一行</td></tr>
+        <tr><td><kbd>h</kbd> 向左滚动一段距离</td><td><kbd>k</kbd> 向右滚动一段距离</td></tr>
+        <tr><td><kbd>/</kbd> 进入搜索模式</td><td><kbd>:</kbd> 进入命令模式</td></tr>
+        <tr><td><kbd>Esc</kbd> 退出搜索/命令模式</td></tr>
+    </table>
     <center><a href="javascript:$('#term-help').hide()" class="alert-link">关闭此提示</a></center>
 </div>
 <div id="content">加载中...请等待...</div>
@@ -70,17 +73,13 @@
     }
     .term .fg1 { color: #f33; }
     .term .bg4 { background-color :yellow; }
+    .term .fmt1 { font-weight: 800; }
     #footer.focus {
         display: block;
         border-top: solid 2px aquamarine;
     }
 </style>
-
-<SCRIPT LANGUAGE="JavaScript">
-function fillContent(text) {
-    $("#content").text(text);
-}
-
+<script>
 window.term = new Term({
     fulltext: "",
     linesPerScreen: $("#content").height() / 15,
@@ -140,12 +139,13 @@ $("body").keydown(function (e) {
     }
     switch (e.key) {
         case 'Escape': $("#term-help").hide(); break;
-        case '?': case 'h':
-             $("#term-help").show(); break;
+        case '?': $("#term-help").show(); break;
         case 'k': term.prevLine(); break;
         case 'j': term.nextLine(); break;
         case 'd': term.nextPage(0.5); break;
         case 'u': term.prevPage(0.5); break;
+        case 'l': $("#content").scrollLeft($("#content").scrollLeft() + 100); break;
+        case 'h': $("#content").scrollLeft($("#content").scrollLeft() - 100); break;
         case ':': startInputCommand(":", "command"); break;
         case '/': startInputCommand("/", "search"); break;
     }

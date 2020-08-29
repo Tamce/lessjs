@@ -60,10 +60,12 @@ function Term(options) {
         let match = null;
         let curfg = 9;
         let curbg = 9;
+        let curfmt = 9;
         while (match = text.match(/\033\[(.*?)m/)) {
             let ctrls = match[1].split(";");
             // console.log("Color segs:", ctrls);
             
+            let cls = "";
             ctrls.forEach(ctrl => {
                 if (ctrl >= 30 && ctrl <= 39) {
                     // foreground
@@ -71,9 +73,12 @@ function Term(options) {
                 } else if (ctrl >= 40 && ctrl <= 49) {
                     // backgoround
                     curbg = ctrl - 40;
+                } else if (ctrl < 10) {
+                    // formatter
+                    curfmt = ctrl;
                 }
             });
-            let cls = `fg${curfg} bg${curbg}`;
+            cls = `fg${curfg} bg${curbg} fmt${}`;
             text = text.replace(/\033\[(.*?)m/, `</span><span class="${cls}">`);
         }
         return text;
