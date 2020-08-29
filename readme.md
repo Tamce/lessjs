@@ -3,9 +3,6 @@
 2. 基本保持和 `less` 一致的快捷键以降低使用学习成本，并且提供颜色字符高亮显示功能(目前支持不全)。
 
 ## 快捷键说明
-<style>
-    #kbd-table td { padding: 0 12px; }
-</style>
 <table id="kbd-table">
     <tr><td><kbd>?</kbd> 显示帮助信息<br></td><td><kbd>Esc</kbd> 关闭此提示</td></tr>
     <tr><td><kbd>u</kbd> 向上滚动半屏</td><td><kbd>d</kbd> 向下滚动半屏</td></tr>
