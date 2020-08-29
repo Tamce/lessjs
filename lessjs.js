@@ -149,6 +149,7 @@ Term.prototype.nextMatch = function (diff) {
         diff = 1;
     }
 
+    this.show();    // update highlight style display first
     let cur = this.curLine + diff;
     while (cur < this.fullLines.length) {
         if (this.fullLines[cur].match(this.highlightReg)) {
@@ -252,7 +253,7 @@ Term.prototype.setHighlight = function (regText) {
     }
     this.debugLog("setHighlight: ", regText, "g" + flag);
     this.highlightReg = new RegExp("(" + regText + ")", "g" + flag);
-    this.show();
+    this.nextMatch();
 }
 
 Term.prototype.noHighlight = function () {
