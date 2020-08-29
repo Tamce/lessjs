@@ -1,10 +1,73 @@
 function Term(options) {
-    this.enabled = false;
-    this.linesPerScreen = options.linesPerScreen;
-    this.funShowHtml = options.funShowHtml;
+    this.enabled = options.enabled || false;
+    this.linesPerScreen = options.linesPerScreen || 100;
+    this.funShowHtml = options.funShowHtml || null;
+    this.funOpenCommand = options.funOpenCommand || null;
+    this.funCloseCommand = options.funCloseCommand || null;
+    this.funShowCommand = options.funShowCommand || null;
+    this.beforeCommandSubmit = options.beforeCommandSubmit || null;
+    this.onKeyEvent = options.onKeyEvent || null;
+
     this.highlightReg = false;
+    this.inCommandMode = false;
+    this.commandText = "";
     this.tempDiv = document.createElement("div");
-    this.setText(options.fulltext);
+    this.setText(options.fulltext || "");
+}
+
+Term.prototype.isPrintableKeyCode = function (keycode) {
+    let valid = 
+        (keycode > 47 && keycode < 58)   || // number keys
+        keycode == 32 || keycode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
+        (keycode > 64 && keycode < 91)   || // letter keys
+        (keycode > 95 && keycode < 112)  || // numpad keys
+        (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
+        (keycode > 218 && keycode < 223);   // [\]' (in order)
+    return valid;
+}
+
+Term.prototype.handleKeyEvent = function (e) {
+    if (!this.enabled) return;
+    if (this.onKeyEvent) this.onKeyEvent(e);
+    if (this.inCommandMode) {
+        if (e.key == 'Escape') {
+            if (this.funCloseCommand) this.funCloseCommand();
+            return;
+        }
+        if (e.key == 'Enter') {
+            if (this.funShowCommand) this.funShowCommand(this.commandText);
+            if (this.beforeCommandSubmit) {
+                this.commandText = this.beforeCommandSubmit(this.commandText);
+            }
+            this.sendCommand(this.commandText);
+            if (this.funCloseCommand)
+                this.funCloseCommand();
+            return;
+        }
+        if (e.key == 'Backspace') {
+            this.commandText = this.commandText.substr(0, this.commandText.length - 1);
+            if (this.commandText.length == 1) {
+                if (this.funCloseCommand)
+                    this.funCloseCommand();
+            }
+            if (this.funShowCommand) this.funShowCommand(this.commandText);
+            return;
+        } else if (isPrintableKeyCode(e.keyCode)) {
+            this.commandText += e.key;
+        }
+        if (this.funShowCommand) this.funShowCommand(this.commandText);
+        return;
+    }
+    switch (e.key) {
+        case 'k': this.prevLine(); break;
+        case 'j': this.nextLine(); break;
+        case 'd': this.nextPage(0.5); break;
+        case 'u': this.prevPage(0.5); break;
+        // case 'l': $("#content").scrollLeft($("#content").scrollLeft() + 100); break;
+        // case 'h': $("#content").scrollLeft($("#content").scrollLeft() - 100); break;
+        case ':': if (this.funOpenCommand) this.funOpenCommand(":", "command"); break;
+        case '/': if (this.funOpenCommand) this.funOpenCommand("/", "search"); break;
+    }
 }
 
 Term.prototype.setText = function (text) {
@@ -95,7 +158,7 @@ Term.prototype.parseColor = function (text) {
 }
 
 Term.prototype.show = function () {
-    if (this.enabled) {
+    if (this.enabled && this.funShowHtml) {
         let text = this.encodeHtmlEntities(this.text(true));
         // Highlights
         if (this.highlightReg) {
