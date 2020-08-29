@@ -1,12 +1,16 @@
 function Term(options) {
+    this.debug = options.debug || false;
+    this.debugPrintThis = options.debugPrintThis || false;
     this.enabled = options.enabled || false;
     this.linesPerScreen = options.linesPerScreen || 100;
     this.funShowHtml = options.funShowHtml || null;
-    this.funOpenCommand = options.funOpenCommand || null;
-    this.funCloseCommand = options.funCloseCommand || null;
-    this.funShowCommand = options.funShowCommand || null;
+    this.funShowCommandBar = options.funShowCommandBar || null;
+    this.funHideCommandBar = options.funHideCommandBar || null;
+    this.funSetCommandBarText = options.funSetCommandBarText || null;
     this.beforeCommandSubmit = options.beforeCommandSubmit || null;
+    this.funSetStatusBarText = options.funSetStatusBarText || null;
     this.onKeyEvent = options.onKeyEvent || null;
+    document.querySelector(options.keydownElement).onkeydown = this.handleKeyEvent.bind(this);
 
     this.highlightReg = false;
     this.inCommandMode = false;
@@ -26,47 +30,66 @@ Term.prototype.isPrintableKeyCode = function (keycode) {
     return valid;
 }
 
+Term.prototype.debugLog = function(...args) {
+    if (this.debug && this.debugPrintThis) {
+        console.log(...args, this);
+    } else if (this.debug) {
+        console.log(...args);
+    }
+}
+
 Term.prototype.handleKeyEvent = function (e) {
+    this.debugLog("handleKeyEvent: ", e.key, e.keyCode);
     if (!this.enabled) return;
     if (this.onKeyEvent) this.onKeyEvent(e);
     if (this.inCommandMode) {
         if (e.key == 'Escape') {
-            if (this.funCloseCommand) this.funCloseCommand();
+            if (this.funHideCommandBar) this.funHideCommandBar();
+            this.inCommandMode = false;
             return;
         }
         if (e.key == 'Enter') {
-            if (this.funShowCommand) this.funShowCommand(this.commandText);
+            this.inCommandMode = false;
+            if (this.funSetCommandBarText) this.funSetCommandBarText(this.commandText);
             if (this.beforeCommandSubmit) {
                 this.commandText = this.beforeCommandSubmit(this.commandText);
             }
             this.sendCommand(this.commandText);
-            if (this.funCloseCommand)
-                this.funCloseCommand();
+            if (this.funHideCommandBar)
+                this.funHideCommandBar();
             return;
         }
         if (e.key == 'Backspace') {
             this.commandText = this.commandText.substr(0, this.commandText.length - 1);
             if (this.commandText.length == 1) {
-                if (this.funCloseCommand)
-                    this.funCloseCommand();
+                this.inCommandMode = false;
+                if (this.funHideCommandBar)
+                    this.funHideCommandBar();
+                return;
             }
-            if (this.funShowCommand) this.funShowCommand(this.commandText);
+            if (this.funSetCommandBarText) this.funSetCommandBarText(this.commandText);
             return;
-        } else if (isPrintableKeyCode(e.keyCode)) {
+        } else if (this.isPrintableKeyCode(e.keyCode)) {
             this.commandText += e.key;
         }
-        if (this.funShowCommand) this.funShowCommand(this.commandText);
+        if (this.funSetCommandBarText) this.funSetCommandBarText(this.commandText);
         return;
     }
     switch (e.key) {
+        case 'g': this.setLine(0); break;
+        case 'G': this.setLine(this.fullLines.length); this.prevPage(0.5); break;
         case 'k': this.prevLine(); break;
         case 'j': this.nextLine(); break;
         case 'd': this.nextPage(0.5); break;
         case 'u': this.prevPage(0.5); break;
-        // case 'l': $("#content").scrollLeft($("#content").scrollLeft() + 100); break;
-        // case 'h': $("#content").scrollLeft($("#content").scrollLeft() - 100); break;
-        case ':': if (this.funOpenCommand) this.funOpenCommand(":", "command"); break;
-        case '/': if (this.funOpenCommand) this.funOpenCommand("/", "search"); break;
+        case ':':
+        case '/':
+            this.inCommandMode = true;
+            this.commandText = e.key;
+            if (this.funShowCommandBar) {
+                this.funShowCommandBar(e.key, e.key == ':' ? 'command' : 'search');
+            }
+            break;
     }
 }
 
@@ -75,9 +98,14 @@ Term.prototype.setText = function (text) {
     this.fullLines = this.fulltext.split("\n");
     this.curScreen = [];
     this.curLine = 0;
+    this.show();
 }
 
 Term.prototype.setLine = function (line) {
+    line = Math.floor(line);
+    if (isNaN(line)) {
+        line = 0;
+    }
     this.curLine = line;
     if (this.curLine < 0)
         this.curLine = 0;
@@ -110,7 +138,6 @@ Term.prototype.prev = function (line) {
 
 Term.prototype.next = function (line) {
     this.setLine(this.curLine + line);
-    this.show();
 }
 
 Term.prototype.text = function (update) {
@@ -160,6 +187,7 @@ Term.prototype.parseColor = function (text) {
 Term.prototype.show = function () {
     if (this.enabled && this.funShowHtml) {
         let text = this.encodeHtmlEntities(this.text(true));
+        text = text.replace(/\n/g, "<br>");
         // Highlights
         if (this.highlightReg) {
             text = text.replace(this.highlightReg, '\033\[44m$1\033\[49m');
@@ -168,6 +196,12 @@ Term.prototype.show = function () {
         // Parse color control characters
         text = this.parseColor(text);
         this.funShowHtml(text);
+        if (this.funSetStatusBarText) {
+            let cur = this.curLine + 1;
+            let tot = this.fullLines.length;
+            let percent = Math.floor(cur / tot * 100);
+            this.funSetStatusBarText(`${cur} / ${tot} (${percent}%)`);
+        }
     }
 }
 
@@ -189,7 +223,7 @@ Term.prototype.noHighlight = function () {
 }
 
 Term.prototype.sendCommand = function (cmd) {
-    console.log(cmd);
+    this.debugLog("sendCommand handle command: ", cmd);
     if (cmd.substr(0, 7) == "/alert ") {
         return alert(cmd.substr(7));
     }
