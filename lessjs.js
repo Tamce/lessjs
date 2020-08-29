@@ -263,7 +263,7 @@ Term.prototype.noHighlight = function () {
 
 Term.prototype.sendCommand = function (cmd) {
     this.debugLog("sendCommand handle command: ", cmd);
-    if (cmd.substr(0, 7) == "/alert ") {
+    if (cmd.substr(0, 7) == ":alert ") {
         return alert(cmd.substr(7));
     }
 
