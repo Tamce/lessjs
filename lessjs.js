@@ -2,7 +2,7 @@ function Term(options) {
     this.debug = options.debug || false;
     this.debugPrintThis = options.debugPrintThis || false;
     this.enabled = options.enabled || false;
-    this.linesPerScreen = options.linesPerScreen || 100;
+    this.linesPerScreen = Math.floor(options.linesPerScreen || 100);
     this.funShowHtml = options.funShowHtml || null;
     this.funShowCommandBar = options.funShowCommandBar || null;
     this.funHideCommandBar = options.funHideCommandBar || null;
@@ -244,8 +244,14 @@ Term.prototype.encodeHtmlEntities = function (text) {
 
 Term.prototype.setHighlight = function (regText) {
     if (!regText) return;
-    this.highlightReg = new RegExp("(" + regText + ")", "g");
-    this.debugLog("setHighlight to ", this.highlightReg);
+    // Only support for i flag
+    let flag = "";
+    if (regText.match(/(?!\\).\/i$/)) {
+        flag = "i";
+        regText = regText.substr(0, regText.length - 2);
+    }
+    this.debugLog("setHighlight: ", regText, "g" + flag);
+    this.highlightReg = new RegExp("(" + regText + ")", "g" + flag);
     this.show();
 }
 
