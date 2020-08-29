@@ -15,6 +15,7 @@ function Term(options) {
     this.highlightReg = false;
     this.inCommandMode = false;
     this.commandText = "";
+    this.statusText = "";
     this.tempDiv = document.createElement("div");
     this.setText(options.fulltext || "");
 }
@@ -61,7 +62,7 @@ Term.prototype.handleKeyEvent = function (e) {
         }
         if (e.key == 'Backspace') {
             this.commandText = this.commandText.substr(0, this.commandText.length - 1);
-            if (this.commandText.length == 1) {
+            if (this.commandText.length < 1) {
                 this.inCommandMode = false;
                 if (this.funHideCommandBar)
                     this.funHideCommandBar();
@@ -82,6 +83,8 @@ Term.prototype.handleKeyEvent = function (e) {
         case 'j': this.nextLine(); break;
         case 'd': this.nextPage(0.5); break;
         case 'u': this.prevPage(0.5); break;
+        case 'n': this.nextMatch(); break;
+        case 'N': this.prevMatch(); break;
         case ':':
         case '/':
             this.inCommandMode = true;
@@ -140,6 +143,27 @@ Term.prototype.next = function (line) {
     this.setLine(this.curLine + line);
 }
 
+Term.prototype.nextMatch = function (diff) {
+    if (!this.highlightReg) return;
+    if (!diff) {
+        diff = 1;
+    }
+
+    let cur = this.curLine + diff;
+    while (cur < this.fullLines.length) {
+        if (this.fullLines[cur].match(this.highlightReg)) {
+            this.setLine(cur);
+            return;
+        }
+        cur += diff;
+    }
+    this.setStatus("NOT FOUND | ");
+}
+
+Term.prototype.prevMatch = function () {
+    return this.nextMatch(-1);
+}
+
 Term.prototype.text = function (update) {
     if (!update) {
         return this.curScreen.join("\n");
@@ -184,6 +208,17 @@ Term.prototype.parseColor = function (text) {
     return text;
 }
 
+Term.prototype.setStatus = function (status) {
+    this.statusText = status || "";
+    if (this.funSetStatusBarText) {
+        let cur = this.curLine + 1;
+        let tot = this.fullLines.length;
+        let percent = Math.floor(cur / tot * 100);
+        status = this.statusText + `${cur} / ${tot} (${percent}%)`;
+        this.funSetStatusBarText(status);
+    }
+}
+
 Term.prototype.show = function () {
     if (this.enabled && this.funShowHtml) {
         let text = this.encodeHtmlEntities(this.text(true));
@@ -196,12 +231,7 @@ Term.prototype.show = function () {
         // Parse color control characters
         text = this.parseColor(text);
         this.funShowHtml(text);
-        if (this.funSetStatusBarText) {
-            let cur = this.curLine + 1;
-            let tot = this.fullLines.length;
-            let percent = Math.floor(cur / tot * 100);
-            this.funSetStatusBarText(`${cur} / ${tot} (${percent}%)`);
-        }
+        this.setStatus();
     }
 }
 
@@ -212,8 +242,9 @@ Term.prototype.encodeHtmlEntities = function (text) {
 }
 
 Term.prototype.setHighlight = function (regText) {
+    if (!regText) return;
     this.highlightReg = new RegExp("(" + regText + ")", "g");
-    console.log("setHighlight to ", this.highlightReg);
+    this.debugLog("setHighlight to ", this.highlightReg);
     this.show();
 }
 
