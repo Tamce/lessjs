@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>查看日志</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="lessjs.js"></script>
+</head>
+<body>
+<div id="term-help" class="alert alert-info" style="display: none; position: fixed; width: 50vw; left: 25vw; top: 20vh;">
+    <b>lessjs 是什么？</b><br>
+    <p>
+    1. lessjs 是仿 linux 下 <code>less</code> 命令的基本操作方法，直接在网页上对长文本进行浏览和筛选的工具。<br>
+    2. 基本保持和 <code>less</code> 一致的快捷键以降低使用学习成本，并且提供颜色字符高亮显示功能(目前支持不全)。<br>
+    <br>
+    <b>快捷键说明</b><br>
+    <p>
+        <kbd>?</kbd> / <kbd>h</kbd> 显示此帮助信息<br>
+        <kbd>Esc</kbd> 关闭此提示<br>
+        <kbd>u</kbd> 向上滚动半屏<br>
+        <kbd>d</kbd> 向下滚动半屏<br>
+        <kbd>k</kbd> 向上滚动一行<br>
+        <kbd>j</kbd> 向下滚动一行<br>
+    </p>
+    <center><a href="javascript:$('#term-help').hide()" class="alert-link">关闭此提示</a></center>
+</div>
+<div id="content">加载中...请等待...</div>
+<div id="footer" class="term-only">
+    <span style="color:aquamarine;">command&gt; </span>
+    <span id="command"></span>
+</div>
+<style>
+    #content {
+        height: 98vh;
+        white-space: pre;
+        overflow-y: scroll;
+        overflow-x: auto;
+    }
+    #footer {
+        position: fixed;
+        display: none;
+        width: 100%;
+        bottom: 5px;
+        height: 2em;
+        line-height: 2em;
+        color: white;
+        font-size: 1.2em;
+        padding: 0 1em;
+        background-color: #303030;
+    }
+    .term .lines {
+        display: none;
+    }
+    .term-only {
+        display: none;
+    }
+    .term .term-only {
+        display: block;
+    }
+    body.term {
+        background-color: #303030;
+    }
+    .term #content {
+        overflow-y: hidden;
+        color: #f0ffff;
+        width: 100vw !important;
+        padding: 10px 12px;
+    }
+    .term .error {
+        color: #f33;
+    }
+    #footer.focus {
+        display: block;
+        border-top: solid 2px aquamarine;
+    }
+</style>
+
+<SCRIPT LANGUAGE="JavaScript">
+function fillContent(text) {
+    $("#content").text(text);
+}
+
+window.term = new Term({
+    fulltext: "",
+    linesPerScreen: $("#content").height() / 15,
+    funShowHtml: function (text) {
+        $("#content").text(text);
+        text = $("#content").html();
+        text = text.replace(/\033\[31;49;1m/g, '<span class="error">');
+        text = text.replace(/\033\[39;49;0m/g, "</span>");
+        $("#content").html(text);
+    }
+});
+function startInputCommand(prefix) {
+    window.commandMode = true;
+    window.command = prefix;
+    $("#footer").addClass("focus");
+    $("#command").text(window.command);
+}
+function exitCommandMode() {
+    window.commandMode = false;
+    window.command = "";
+    $("#command").text(window.command);
+    $("#footer").removeClass("focus");
+}
+function isPrintableKeyCode(keycode) {
+    let valid = 
+        (keycode > 47 && keycode < 58)   || // number keys
+        keycode == 32 || keycode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
+        (keycode > 64 && keycode < 91)   || // letter keys
+        (keycode > 95 && keycode < 112)  || // numpad keys
+        (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
+        (keycode > 218 && keycode < 223);   // [\]' (in order)
+    return valid;
+}
+window.term.enabled = true;
+window.term.show();
+$("body").addClass("term");
+$("body").keydown(function (e) {
+    if (!window.term.enabled)
+        return;
+    // console.log (e.keyCode, e.key);
+    if (window.commandMode) {
+        if (e.key == 'Escape') {
+            return exitCommandMode();
+        }
+        if (e.key == 'Enter') {
+            window.term.sendCommand(window.command);
+            $("#command").text(window.command);
+            return exitCommandMode();
+        }
+        if (e.key == 'Backspace') {
+            if (window.command.length == 1) {
+                return exitCommandMode();
+            }
+            window.command = window.command.substr(0, window.command.length - 1);
+        } else if (isPrintableKeyCode(e.keyCode)) {
+            window.command += e.key;
+        }
+        $("#command").text(window.command);
+        return;
+    }
+    switch (e.key) {
+        case 'Escape': $("#term-help").hide(); break;
+        case '?': case 'h':
+             $("#term-help").show(); break;
+        case 'k': term.prevLine(); break;
+        case 'j': term.nextLine(); break;
+        case 'd': term.nextPage(0.5); break;
+        case 'u': term.prevPage(0.5); break;
+        case ':': startInputCommand(":"); break;
+        case '/': startInputCommand("/"); break;
+    }
+});
+$(document).ready(function(){
+    $.ajax({
+        type: 'GET',
+        url: "/largetext.txt",
+        error: function (data) {
+            console.error("fetch data error");
+        },
+        success:function(data){
+            window.term.setText(data);
+            window.term.show();
+        }
+    });
+});
+</script>
+</body>
+</html>
