@@ -16,7 +16,10 @@ function Term(options) {
     this.beforeCommandSubmit = options.beforeCommandSubmit || null;
     this.funSetStatusBarText = options.funSetStatusBarText || null;
     this.onKeyEvent = options.onKeyEvent || null;
-    document.querySelector(options.keydownElement).onkeydown = this.handleKeyEvent.bind(this);
+    let el = document.querySelector(options.keydownElement);
+    el.onkeydown = this.handleKeyEvent.bind(this);
+    el.onmousewheel = this.handleWheelEvent.bind(this);
+    
 
     this.highlightReg = false;
     this.inCommandMode = false;
@@ -24,6 +27,14 @@ function Term(options) {
     this.statusText = "";
     this.tempDiv = document.createElement("div");
     this.setText(options.fulltext || "");
+}
+
+Term.prototype.handleWheelEvent(e) {
+    if (e.deltaY > 0) {
+        this.nextLine();
+    } else if (e.deltaY < 0) {
+        this.prevLine();
+    }
 }
 
 Term.prototype.isPrintableKeyCode = function (keycode) {
