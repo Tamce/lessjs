@@ -10,6 +10,15 @@
 </head>
 <body class="term">
 <style>
+    .term-only {
+        display: none;
+    }
+    .term .term-only {
+        display: block;
+    }
+    body.term {
+        background-color: #303030;
+    }
     #content {
         height: 100vh;
         overflow-y: hidden;
@@ -49,18 +58,6 @@
         padding: 0 1em;
         background-color: #303030;
         z-index: 9;
-    }
-    .term .lines {
-        display: none;
-    }
-    .term-only {
-        display: none;
-    }
-    .term .term-only {
-        display: block;
-    }
-    body.term {
-        background-color: #303030;
     }
     .term #content {
         overflow-y: hidden;
@@ -160,7 +157,6 @@ window.term = new Term({
         $("#command").text(prefix);
     },
     funHideCommandBar: function () {
-        $("#command").text(window.command);
         $("#footer").removeClass("focus");
     },
     funSetCommandBarText: function (text) {

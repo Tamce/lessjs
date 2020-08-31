@@ -1,3 +1,9 @@
+/**
+ * LessJs, https://github.com/tamce/lessjs
+ * Author: Tamce <tamce@outlook.com>
+ * License MIT
+ */
+
 function Term(options) {
     this.debug = options.debug || false;
     this.debugPrintThis = options.debugPrintThis || false;
@@ -52,9 +58,6 @@ Term.prototype.handleKeyEvent = function (e) {
         if (e.key == 'Enter') {
             this.inCommandMode = false;
             if (this.funSetCommandBarText) this.funSetCommandBarText(this.commandText);
-            if (this.beforeCommandSubmit) {
-                this.commandText = this.beforeCommandSubmit(this.commandText);
-            }
             this.sendCommand(this.commandText);
             if (this.funHideCommandBar)
                 this.funHideCommandBar();
@@ -261,7 +264,15 @@ Term.prototype.noHighlight = function () {
 }
 
 Term.prototype.sendCommand = function (cmd) {
-    this.debugLog("sendCommand handle command: ", cmd);
+    this.debugLog("send command: ", cmd);
+    if (this.beforeCommandSubmit) {
+        this.commandText = this.beforeCommandSubmit(this.commandText);
+    }
+    this.commitCommand(this.commandText);
+}
+
+Term.prototype.commitCommand = function (cmd) {
+    this.debugLog("commit command: ", cmd);
     if (cmd.substr(0, 7) == ":alert ") {
         return alert(cmd.substr(7));
     }
@@ -270,10 +281,13 @@ Term.prototype.sendCommand = function (cmd) {
         return this.setHighlight(cmd.substr(1));
     }
     
-    if (cmd == ':nohl') {
-        return this.noHighlight();
+    switch (cmd) {
+        case ':nohl': return this.noHighlight();
+        case ':debug': this.debug = true; return;
+        case ':nodebug': this.debug = false; return;
     }
 
+    // jump to line n[%]
     if (cmd.match(/^:\d+$/)) {
         return this.setLine(parseInt(cmd.substr(1)) - 1);
     } else if (cmd.match(/^:\d+%$/)) {
