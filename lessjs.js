@@ -29,12 +29,13 @@ function Term(options) {
     this.setText(options.fulltext || "");
 }
 
-Term.prototype.handleWheelEvent(e) {
+Term.prototype.handleWheelEvent = function (e) {
     if (e.deltaY > 0) {
         this.nextLine();
     } else if (e.deltaY < 0) {
         this.prevLine();
     }
+    e.stopPropagation();
 }
 
 Term.prototype.isPrintableKeyCode = function (keycode) {
