@@ -9,17 +9,15 @@
     <script src="lessjs.js"></script>
     <link rel="stylesheet" href="lessjs.css">
 </head>
-<body class="term">
+<body class="term lined">
 <style>
-    .term-only {
-        display: none;
-    }
-    .term .term-only {
-        display: block;
-    }
-    body.term {
+    body {
         background-color: #303030;
         overscroll-behavior-y: none;
+    }
+
+    #line-number {
+        display: none;
     }
     #content {
         height: 100vh;
@@ -27,7 +25,26 @@
         overflow-x: scroll;
         -ms-overflow-style: none;
         white-space: pre;
+
+        color: #f0ffff;
+        padding-left: 12px;
+        padding-right: 12px;
+        width: 100%;
     }
+    .lined #line-number {
+        display: block;
+        float: left;
+        width: 3em;
+        height: 100vh;
+        overflow: hidden;
+        text-align: right;
+        color: yellow;
+    }
+    .lined #content {
+        float: right;
+        width: calc(100% - 3em);
+    }
+
     #status-bar {
         position: fixed;
         bottom: 0;
@@ -48,6 +65,7 @@
     #content::-webkit-scrollbar {
         height: 0;
     }
+
     #footer {
         position: fixed;
         display: none;
@@ -60,12 +78,6 @@
         padding: 0 1em;
         background-color: #303030;
         z-index: 9;
-    }
-    .term #content {
-        overflow-y: hidden;
-        color: #f0ffff;
-        width: 100vw !important;
-        padding: 10px 12px;
     }
     #footer.focus {
         display: block;
@@ -101,15 +113,19 @@
         <tr><td><code>:wrap</code> 折行显示</td><td><code>:nowrap</code> 不折行显示</td></tr>
         <tr><td><code>:{n}[%]</code> 跳转到第目标行</td><td><code>:nohl</code> 取消高亮显示</td></tr>
         <tr><td><code>:show status</code> 显示状态栏</td><td><code>:hide status</code> 隐藏状态栏</td></tr>
-        <tr><td colspan="2" class="text-center"><code>:resize</code> 更新每屏行数（以适应变化了的窗口高度）</td></tr>
+        <tr><td colspan="2"><code>:resize</code> 更新每屏行数（以适应变化了的窗口高度）</td></tr>
+        <tr><td><code>:nu</code> 显示行号</td><td><code>:nonu</code> 隐藏行号</td></tr>
     </table>
     <br><hr>
     <center><a href="javascript:$('#term-help').hide()" class="btn btn-primary">关闭此提示 (Esc)</a></center>
 </div>
 <div>
-    <div id="content">加载中...请等待...</div>
+    <div class="main-text">
+        <div id="line-number"></div>
+        <div id="content">加载中...请等待...</div>
+    </div>
     <div id="status-bar">status</div>
-    <div id="footer" class="term-only">
+    <div id="footer">
         <span id="cmd-hint" style="color:aquamarine;">command&gt; </span>
         <span id="command"></span>
     </div>
@@ -121,8 +137,11 @@ window.term = new Term({
     enabled: true,
     fulltext: "",
     linesPerScreen: $("#content").height() / 15,
-    funShowHtml: function (text) {
-        $("#content").html(text);
+    funShowHtml: function (html) {
+        $("#content").html(html);
+    },
+    funShowLineNumber: function (html) {
+        $("#line-number").html(html);
     },
     funShowCommandBar: function (prefix, hint) {
         $("#footer").addClass("focus");
@@ -143,6 +162,12 @@ window.term = new Term({
             case ':show status': $("#status-bar").show(); break;
             case ':help': $("#term-help").show(); break;
             case ':resize': this.linesPerScreen = $("#content").height() / 15; this.show(); break;
+            case ':nu':
+            case ':set nu':
+                $("body").addClass("lined"); break;
+            case ':nonu':
+            case ':set nonu':
+                $("body").removeClass("lined"); break;
         }
         return text;
     },
@@ -159,7 +184,7 @@ window.term = new Term({
     funSetStatusBarText: function (text) {
         $("#status-bar").text(text);
     },
-    keydownElement: "body"
+    eventElement: "body"
 });
 
 // Just Load test data

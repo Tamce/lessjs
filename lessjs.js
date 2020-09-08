@@ -10,13 +10,14 @@ function Term(options) {
     this.enabled = options.enabled || false;
     this.linesPerScreen = Math.floor(options.linesPerScreen || 100);
     this.funShowHtml = options.funShowHtml || null;
+    this.funShowLineNumber = options.funShowLineNumber || null;
     this.funShowCommandBar = options.funShowCommandBar || null;
     this.funHideCommandBar = options.funHideCommandBar || null;
     this.funSetCommandBarText = options.funSetCommandBarText || null;
     this.beforeCommandSubmit = options.beforeCommandSubmit || null;
     this.funSetStatusBarText = options.funSetStatusBarText || null;
     this.onKeyEvent = options.onKeyEvent || null;
-    let el = document.querySelector(options.keydownElement);
+    let el = document.querySelector(options.eventElement);
     el.onkeydown = this.handleKeyEvent.bind(this);
     el.onmousewheel = this.handleWheelEvent.bind(this);
     
@@ -248,6 +249,14 @@ Term.prototype.show = function () {
         text = this.parseColor(text);
         this.funShowHtml(text);
         this.setStatus();
+    }
+    if (this.enabled && this.funShowLineNumber) {
+        let ln = this.curLine;
+        let result = this.curScreen.map(function () {
+            ln++;
+            return ln;
+        });
+        this.funShowLineNumber(result.join("<br>"));
     }
 }
 

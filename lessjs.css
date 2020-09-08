@@ -21,7 +21,7 @@
 .term .bg7 { background-color: #ffffff; }
 .term .bg9 { background-color: #323232; } /* default */
 
-.term .fmt1 { font-weight: 800; }
+.term .fmt1 { font-weight: bold; }
 .term .fmt4 { text-decoration: underline; }
 
 .term .bg3.fg9 { color: #323232; } /* 避免黄色太亮看不到字 */
