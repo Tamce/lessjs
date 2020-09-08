@@ -94,7 +94,7 @@ Term.prototype.handleKeyEvent = function (e) {
     }
     switch (e.key) {
         case 'g': this.setLine(0); break;
-        case 'G': this.setLine(this.fullLines.length); this.prevPage(0.5); break;
+        case 'G': this.setLine(this.fullLines.length); break;
         case 'k': this.prevLine(); break;
         case 'j': this.nextLine(); break;
         case 'd': this.nextPage(0.5); break;
@@ -126,10 +126,11 @@ Term.prototype.setLine = function (line) {
         line = 0;
     }
     this.curLine = line;
-    if (this.curLine < 0)
+    let max = Math.floor(this.fullLines.length - this.linesPerScreen / 3);
+    if (this.curLine < 0) {
         this.curLine = 0;
-    else if (this.curLine >= this.fullLines.length) {
-        this.curLine = this.fullLines.length - 1;
+    } else if (this.curLine >= max) {
+        this.curLine = max;
     }
     this.show();
 }
